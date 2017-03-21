@@ -13,6 +13,8 @@ word_features = []
 
 categories_arr = []
 
+feature_sets_chi = []
+
 
 def document_features(document):
     """
@@ -42,6 +44,39 @@ def save_to_pickle(obj, filename):
     pickle.dump(obj, save_f)
 
 
+def feature_selection_chi(documents, all_words):
+    word_segs_A = nltk.FreqDist()
+    word_segs_B = nltk.FreqDist()
+    word_degree_C = nltk.FreqDist()
+    word_degree_D = nltk.FreqDist()
+    category = []
+    all_words = set(all_words)
+    N = len(all_words)
+    for (words, c) in documents:
+        set_words = set(words)
+        category.append(c)
+        for w in all_words:
+            if w in set_words:
+                word_segs_A[w + 'is' + c] += 1
+                word_segs_B[w] += 1
+            else:
+                word_degree_C['not' + w + c] += 1
+                word_degree_D[w] += 1
+    features = nltk.FreqDist()
+    for c in category:
+        ws = nltk.FreqDist()
+        for w in all_words:
+            A = word_segs_A[w + 'is' + c]
+            B = word_segs_B[w] - A
+            C = word_degree_C['not' + w + c]
+            D = word_degree_D[w] - C
+            E = N*((A*D - B*C) * (A*D - B*C)) / ((A+C) * (A + B) * (B+D) * (C + D))
+            ws[w] = E
+        for (w, _) in ws.most_common(1000):
+            features[w] += 1
+    return features
+
+
 def load_documents(filename):
     """
     load corpus from file
@@ -60,15 +95,14 @@ def load_documents(filename):
 
         documents = []
 
+        jieba.analyse.set_stop_words('./framework/stop_words_for_tags.txt')
         while text:
             list_t = text.split(' ', 1)
             category = list_t[0]
             raw = list_t[1]
-            #MLog.logger.debug('raw text: ' + text)
-            #seg_list = jieba.cut(raw)
 
             # feature extractor (特征词抽取。对于短文本而言，这个就够用了)
-            seg_list = jieba.analyse.extract_tags(raw, topK=20, withWeight=False)
+            seg_list = jieba.analyse.extract_tags(raw, topK=30, withWeight=False)
             documents.append((list(seg_list), category))
             text = file_.readline()
 
@@ -80,18 +114,21 @@ def load_documents(filename):
         all_words = nltk.FreqDist(w for (words, _) in documents
                                   for w in words)
 
+        # all_words = feature_selection_chi(documents, all_words)
+
         # feature selection 特征选择（TF-词频）
         N = all_words.N()
         most_common = all_words.most_common(2000)
         for (w, freq) in most_common:
             word_features.append((w, freq/N))
 
+        print(word_features)
+
         save_to_pickle(word_features, "word_features.pickle")
 
         featuresets = [(document_features(d), c) for (d, c) in documents]
 
-        #total = len(featuresets)
-        train_set, test_set = featuresets[100:], featuresets[:100]
+        train_set, test_set = featuresets[500:], featuresets[:500]
         classifier = nltk.NaiveBayesClassifier.train(train_set)
         print(nltk.classify.accuracy(classifier, test_set))
         classifier.show_most_informative_features(5)
@@ -104,10 +141,12 @@ def load_documents(filename):
             p = classifier.prob_classify(document_features(jieba.analyse.extract_tags("全国人民代表大会常务委员会关于特赦确实改恶从善的罪犯的决定［失效］"))).prob(label)
             print("全国人民代表大会常务委员会关于特赦确实改恶从善的罪犯的决定［失效］:%s-%f" % (label, p))
 
-        for label in labels:
-            p = classifier.prob_classify(document_features(jieba.analyse.extract_tags("我找你啊"))).prob(label)
-            print("我找你啊:%s-%f" % (label, p))
-
+        test_feature = document_features(jieba.analyse.extract_tags("鸡西市人民政府工作规则"))
+        if len(test_feature):
+            for label in labels:
+                p = classifier.prob_classify(test_feature).prob(label)
+                print("鸡西市人民政府工作规则:%s-%f" % (label, p))
+        print(classifier.prob_classify(test_feature).max())
         save_to_pickle(classifier, "NaiveBayesClassifier.pickle")
 
         """
