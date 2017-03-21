@@ -7,9 +7,11 @@ import nltk
 import random
 import pickle
 
-corpus_data_dir = '/Users/xlegal/Program/Work/NextLegalDev/corpus'
+corpus_data_dir = './sample'
 
 word_features = []
+
+categories_arr = []
 
 
 def document_features(document):
@@ -21,8 +23,11 @@ def document_features(document):
     global word_features
     document_words = set(document)
     features = {}
-    for word in word_features:
-        features['contains({})'.format(word)] = (word in document_words)
+    for word, freq in word_features:
+        if word in document_words:
+            features[word] = freq
+        else:
+            features[word] = 0
     return features
 
 
@@ -61,19 +66,25 @@ def load_documents(filename):
             raw = list_t[1]
             #MLog.logger.debug('raw text: ' + text)
             #seg_list = jieba.cut(raw)
-            seg_list = jieba.analyse.extract_tags(raw)
+
+            # feature extractor (特征词抽取。对于短文本而言，这个就够用了)
+            seg_list = jieba.analyse.extract_tags(raw, topK=20, withWeight=False)
             documents.append((list(seg_list), category))
             text = file_.readline()
 
         random.shuffle(documents)
+
         save_to_pickle(documents, "documents.pickle")
 
+        # bag of words 词袋
         all_words = nltk.FreqDist(w for (words, _) in documents
                                   for w in words)
 
+        # feature selection 特征选择（TF-词频）
+        N = all_words.N()
         most_common = all_words.most_common(2000)
-        for (w, _) in most_common:
-            word_features.append(w)
+        for (w, freq) in most_common:
+            word_features.append((w, freq/N))
 
         save_to_pickle(word_features, "word_features.pickle")
 
@@ -85,10 +96,26 @@ def load_documents(filename):
         print(nltk.classify.accuracy(classifier, test_set))
         classifier.show_most_informative_features(5)
 
+        """
+        Test Case
+        """
+        labels = classifier.labels()
+        for label in labels:
+            p = classifier.prob_classify(document_features(jieba.analyse.extract_tags("全国人民代表大会常务委员会关于特赦确实改恶从善的罪犯的决定［失效］"))).prob(label)
+            print("全国人民代表大会常务委员会关于特赦确实改恶从善的罪犯的决定［失效］:%s-%f" % (label, p))
+
+        for label in labels:
+            p = classifier.prob_classify(document_features(jieba.analyse.extract_tags("我找你啊"))).prob(label)
+            print("我找你啊:%s-%f" % (label, p))
+
         save_to_pickle(classifier, "NaiveBayesClassifier.pickle")
 
-        classifier = nltk.DecisionTreeClassifier.train(train_set)
-        print(nltk.classify.accuracy(classifier, test_set))
+        """
+        Too Slow!!!
+        """
+        if False:
+            classifier = nltk.DecisionTreeClassifier.train(train_set)
+            print(nltk.classify.accuracy(classifier, test_set))
 
         save_to_pickle(classifier, "DecisionTreeClassifier.pickle")
 
