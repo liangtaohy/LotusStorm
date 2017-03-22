@@ -141,11 +141,12 @@ def load_documents(filename):
             p = classifier.prob_classify(document_features(jieba.analyse.extract_tags("全国人民代表大会常务委员会关于特赦确实改恶从善的罪犯的决定［失效］"))).prob(label)
             print("全国人民代表大会常务委员会关于特赦确实改恶从善的罪犯的决定［失效］:%s-%f" % (label, p))
 
-        test_feature = document_features(jieba.analyse.extract_tags("鸡西市人民政府工作规则"))
+        test_text = "最高人民法院关于审理期货纠纷案件若干问题的规定"
+        test_feature = document_features(jieba.analyse.extract_tags(test_text))
         if len(test_feature):
             for label in labels:
                 p = classifier.prob_classify(test_feature).prob(label)
-                print("鸡西市人民政府工作规则:%s-%f" % (label, p))
+                print("%s:%s-%f" % (test_text, label, p))
         print(classifier.prob_classify(test_feature).max())
         save_to_pickle(classifier, "NaiveBayesClassifier.pickle")
 
