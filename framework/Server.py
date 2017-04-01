@@ -46,7 +46,6 @@ def proc_worker(cntl_q, data_q):
     """
     while True:
         item = data_q.get()
-        JsonDataSource
         handle(item)
 
     cntl_q.put({'event': 'exit', 'pid': os.getpid()})
