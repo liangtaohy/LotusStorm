@@ -9,7 +9,7 @@ from framework import Extractor
 
 app = Flask(__name__)
 
-simhash_dict = "/mnt/open-xdp/LotusStorm/simhash_dict.txt"
+simhash_dict = "./simhash_dict.txt"
 
 
 @app.route('/simhash/generate', methods=['POST'])
@@ -37,7 +37,9 @@ def gen_simhash():
         dict.write(simhash.simhash + "\n")
         dict.close()
 
-    return json.dumps({'simhash':simhash.simhash, 'repeated':repeated}, ensure_ascii=False)
+    res = {'code': 0, 'content': {'simhash': simhash.simhash, 'repeated': repeated}}
+
+    return json.dumps(res, ensure_ascii=False)
 
 
 @app.route('/extractor/contents', methods=['POST'])
