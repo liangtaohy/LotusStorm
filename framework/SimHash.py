@@ -72,12 +72,32 @@ class SimHash:
             return str(x)
 
     def hammin_dist(self, com):
+        """
+        hammin distance
+        :param com:
+        :return:
+        """
         t1 = '0b' + self.simhash
         t2 = '0b' + com.simhash
         n = int(t1, 2) ^ int(t2, 2)
         i = 0
         while n:
             n &= n-1
+            i += 1
+        return i
+
+    def hammin_dist_simple(self, simhash):
+        """
+        simple hammin distance
+        :param simhash:
+        :return:
+        """
+        t1 = '0b' + self.simhash
+        t2 = '0b' + simhash
+        n = int(t1, 2) ^ int(t2, 2)
+        i = 0
+        while n:
+            n &= n - 1
             i += 1
         return i
 
