@@ -1,2 +1,2 @@
 export FLASK_APP=SimpleServer.py
-/mnt/open-xdp/local/bin/python3 -m flask run
+nohup /mnt/open-xdp/local/bin/python3 -m flask run &
