@@ -29,7 +29,7 @@ class SimHash:
 
         weight_vs = jieba.analyse.extract_tags(document, topK=topn, withWeight=True, allowPOS=())
         w_list = []
-        for i in range(0, 64):
+        for i in range(0, 128):
             w_list.append(0)
 
         for feature, w in weight_vs:
