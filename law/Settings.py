@@ -1,0 +1,7 @@
+DUPEFILTER_DEBUG = True
+MYSQL_HOST = "60.205.169.24"
+MYSQL_USER = "spider"
+MYSQL_PASS = "asdf1234"
+MYSQL_DB = "spider"
+CHARSET = 'utf8mb4'
+SPIDER_TABLE = 'gov'
