@@ -104,13 +104,16 @@ class GovContentTokenizer:
 
         print(skipids)
 
-        from_id = 0
+        from_id = 256197
 
         for page in range(pages):
             self.cursor.execute("SELECT * FROM gov WHERE id > %d LIMIT %d,%d" % (from_id, page * pagesize, pagesize))
             rows = self.cursor.fetchall()
             for row in rows:
                 if row['id'] in skipids:
+                    continue
+
+                if len(row['content']) == 0:
                     continue
                 doc_type = self.guess_doc_type_from_title(row['title'])
                 if doc_type in ['法', '条例', '管理办法', '管理条例', '令', '办法', '准则', '通则', '宪法']:
@@ -154,11 +157,13 @@ class GovContentTokenizer:
                     if len(valid_time) > 8:
                         valid_time, number = re.subn(r'([0-9]\.)', '', valid_time)
 
-                    sql = "INSERT INTO `law_entity` (`rid`, `entity_id`, `entity_name`, `publish_time`, `valid_time`, `invalid_time`, `author`, `doc_type`, `ctime`) VALUES (%d, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')" % (id, entity_id, entity_name, publish_time, valid_time, invalid_time, author, doc_type, ctime)
+                    sql = "INSERT INTO `law_entity` (`rid`, `entity_id`, `entity_name`, `publish_time`, `valid_time`, `invalid_time`, `author`, `doc_type`, `ctime`) VALUES (%d, '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')" % (id, entity_id, self.db.escape_string(entity_name), publish_time, valid_time, invalid_time, author, doc_type, ctime)
+                    self.cursor.execute(sql)
                     #print(sql)
                     f.write(sql + ";\n")
                     total += 1
                     print(total)
+            self.db.commit()
         f.close()
 
         print("publish:%f, valid:%f" % (statics['publish'] / statics['total'], statics['valid'] / statics['total']))
