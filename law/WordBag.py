@@ -14,6 +14,7 @@ from law import Settings as settings
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import HashingVectorizer
 from sklearn.cluster import KMeans, MiniBatchKMeans
+from gensim import corpora, models, similarities
 
 
 class DocClassifierByTitles:
@@ -38,6 +39,8 @@ class DocClassifierByTitles:
                                                   '/../framework/stop_words_jieba.utf8.txt')]
 
         self.stopList = self.stopList + [' ', '\n', '\t']
+
+        self.title_segs = './title_segs.txt'
 
         print('db open')
 
@@ -95,7 +98,7 @@ class DocClassifierByTitles:
         :return:
         """
         fp = open(file)
-        output_file = open('./title_segs.txt', 'w')
+        output_file = open(self.title_segs, 'w')
         while 1:
             line = fp.readline()
             if not line:
@@ -117,11 +120,47 @@ class DocClassifierByTitles:
         build WordCloud Image
         :return:
         """
-        text = open('./title_segs.txt').read()
+        text = open(self.title_segs).read()
         wordcloud = WordCloud(font_path='/System/Library/Fonts/PingFang.ttc').generate(text)
         plt.imshow(wordcloud, interpolation='bilinear')
         plt.axis("off")
         plt.show()
+
+    def build_stopwords(self, min_df=1, max_idf=9):
+        """
+        Try to build stopwords for new corpus
+
+        remove df < MIN_THRESHHOLD
+        :param min_df: minimum df, default value 1
+        :param max_idf: maximum idf, default value 9
+        :return:
+        """
+        documents = self.loadset(self.title_segs)
+        texts = [[word for word in document.split()] for document in documents]
+        dictionary = corpora.Dictionary(texts)
+        print(dictionary)
+        print(dictionary.token2id)
+
+        corpus = [dictionary.doc2bow(text) for text in texts]
+        print(corpus)
+
+        tfidf = models.TfidfModel(corpus)
+
+        corpus_tfidf = tfidf[corpus]
+
+        print(tfidf.dfs)
+        print(tfidf.idfs)
+
+        stopwords = []
+        for (index, df) in tfidf.dfs.items():
+            if df <= min_df:
+                stopwords.append(dictionary.get(index))
+        print(stopwords)
+        #sorted_idfs = sorted(tfidf.idfs.items(), key=lambda item: -item[1])
+        #print(sorted_idfs[:50])
+
+    def build_byes_model(self):
+        return 0
 
     def tfidf(self, dataset, n_features=1000):
         """
@@ -195,9 +234,10 @@ if __name__ == '__main__':
     cls = DocClassifierByTitles()
     begin = (int(round(time.time() * 1000)))
     #cls.loaddataintorawfile()
-    #cls.parse_lines('./law_raw.txt')
+    cls.parse_lines('./../sample/document_titles.txt')
     #cls.buildWordCloud()
+    cls.build_stopwords()
     #cls.test('./title_segs.txt')
-    cls.doc_cites()
+    #cls.doc_cites()
     end = (int(round(time.time() * 1000)))
     print("Time used: %d" % (end-begin))

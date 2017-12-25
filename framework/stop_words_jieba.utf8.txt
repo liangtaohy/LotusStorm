@@ -1535,6 +1535,15 @@ your
 yours
 yourself
 yourselves
+docx
+doc
+txt
+pdf
+png
+jpg
+gif
+mp4
+mp3
 
 :
 /
