@@ -104,7 +104,7 @@ class GovContentTokenizer:
 
         print(skipids)
 
-        from_id = 256197
+        from_id = 314762
 
         for page in range(pages):
             self.cursor.execute("SELECT * FROM gov WHERE id > %d LIMIT %d,%d" % (from_id, page * pagesize, pagesize))

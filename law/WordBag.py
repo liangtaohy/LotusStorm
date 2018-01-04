@@ -91,6 +91,10 @@ class DocClassifierByTitles:
             dataset.append(line)
         return dataset
 
+    def test_title(self, title):
+        tokens = self.tokenizer.tokenize(title)
+        print(tokens)
+
     def parse_lines(self, file):
         """
         parse file to tokens
@@ -156,6 +160,10 @@ class DocClassifierByTitles:
             if df <= min_df:
                 stopwords.append(dictionary.get(index))
         print(stopwords)
+        fp = open('stopwords1.txt', 'w')
+        str = '\n'.join(stopwords)
+        fp.writelines(str)
+        fp.close()
         #sorted_idfs = sorted(tfidf.idfs.items(), key=lambda item: -item[1])
         #print(sorted_idfs[:50])
 
@@ -235,8 +243,9 @@ if __name__ == '__main__':
     begin = (int(round(time.time() * 1000)))
     #cls.loaddataintorawfile()
     cls.parse_lines('./../sample/document_titles.txt')
-    #cls.buildWordCloud()
+    cls.buildWordCloud()
     cls.build_stopwords()
+    #cls.test_title('《股权众筹融资信息服务协议》终止协议 20150624 V1.txt')
     #cls.test('./title_segs.txt')
     #cls.doc_cites()
     end = (int(round(time.time() * 1000)))
