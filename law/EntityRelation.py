@@ -1,17 +1,8 @@
 #coding=utf-8
 import os
-import re
 import pymysql
-import math
-import time
-import hashlib
-from hdfs import Config
-from law import JiebaTokenizer
+from framework import JiebaTokenizer
 from law import Settings as settings
-from law import InvalidEntity as StopEntity
-from law import GovDict
-from law.DocType import DocType
-from law.DocumentContentParser import DocContentParser
 
 
 class EntityRelation:

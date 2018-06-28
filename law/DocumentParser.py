@@ -1,9 +1,6 @@
-import sys
-from nltk.corpus import PlaintextCorpusReader
-import nltk, re, pprint
-from nltk import word_tokenize
+import re
 import os
-from . import JiebaTokenizer
+from framework import JiebaTokenizer
 from . import DocType
 from . import GovDict
 

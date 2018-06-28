@@ -6,24 +6,14 @@ Target:
 支持Kmeans聚类算法
 """
 import os
-import pymysql
-import math
-import time
-import re
 from wordcloud import WordCloud
-import PIL
 import numpy
-import nltk, re, pprint
+import re
 import matplotlib.pyplot as plt
-from law import JiebaTokenizer
-from law import DocType
-from law import GovDict
-from law import Settings as settings
+from framework import JiebaTokenizer
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.feature_extraction.text import HashingVectorizer
-from sklearn.cluster import KMeans, MiniBatchKMeans
-from sklearn.metrics import jaccard_similarity_score
-from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.cluster import KMeans
+
 
 class LicenseCluster:
     def __init__(self):

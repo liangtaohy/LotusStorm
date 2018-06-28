@@ -1,14 +1,11 @@
 #coding=utf-8
 
 import re
-import nltk
 import os
 import math
 import pymysql
 from law import Settings as settings
-from law.NumberDict import *
-from law.JiebaTokenizer import JiebaTokenizer
-from law import GovDict
+from framework.JiebaTokenizer import JiebaTokenizer
 from law.DocType import DocType
 
 class TitleClusterByDocType:

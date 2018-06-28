@@ -1,37 +1,30 @@
 import os
-import pymysql
 import math
 import time
 import re
 from wordcloud import WordCloud
-import PIL
-import numpy
 import matplotlib.pyplot as plt
-from law import JiebaTokenizer
-from law import DocType
-from law import GovDict
-from law import Settings as settings
+from framework import JiebaTokenizer
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.feature_extraction.text import HashingVectorizer
-from sklearn.cluster import KMeans, MiniBatchKMeans
-from gensim import corpora, models, similarities
+from sklearn.cluster import KMeans
+from gensim import corpora, models
 
 
 class DocClassifierByTitles:
 
     def __init__(self):
-        self.db = pymysql.connect(
+        """self.db = pymysql.connect(
             host=settings.MYSQL_HOST,
             user=settings.MYSQL_USER,
             password=settings.MYSQL_PASS,
             db=settings.MYSQL_DB,
             charset=settings.CHARSET,
             cursorclass=pymysql.cursors.DictCursor
-        )
+        )"""
 
         self.table = 'gov'
 
-        self.cursor = self.db.cursor()
+        #self.cursor = self.db.cursor()
         self.tokenizer = JiebaTokenizer.JiebaTokenizer(os.path.dirname(os.path.realpath(__file__)) +
                                                   '/../framework/stop_words_jieba.utf8.txt')
 
@@ -237,14 +230,15 @@ class DocClassifierByTitles:
         plt.legend()
         plt.show()
 
+
 if __name__ == '__main__':
     print("cls begin")
     cls = DocClassifierByTitles()
     begin = (int(round(time.time() * 1000)))
     #cls.loaddataintorawfile()
-    cls.parse_lines('./../sample/document_titles.txt')
+    cls.parse_lines('/Users/xlegal/PycharmProjects/index-mgr-python/Document/all_titles.txt')
     cls.buildWordCloud()
-    cls.build_stopwords()
+    #cls.build_stopwords()
     #cls.test_title('《股权众筹融资信息服务协议》终止协议 20150624 V1.txt')
     #cls.test('./title_segs.txt')
     #cls.doc_cites()

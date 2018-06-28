@@ -1,8 +1,5 @@
-import sys
-from nltk.corpus import PlaintextCorpusReader
-import nltk, re, pprint
-from nltk import word_tokenize
-from law import JiebaTokenizer
+import nltk, re
+from framework import JiebaTokenizer
 import pymysql
 import math
 import time

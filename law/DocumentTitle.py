@@ -1,8 +1,7 @@
 import sys
 from nltk.corpus import PlaintextCorpusReader
-import nltk, re, pprint
-from nltk import word_tokenize
-from law import JiebaTokenizer
+import nltk
+from framework import JiebaTokenizer
 
 print(sys.getdefaultencoding())
 

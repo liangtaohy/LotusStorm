@@ -1,7 +1,7 @@
 #coding=utf-8
 import re
 from law.NumberDict import *
-from law.JiebaTokenizer import JiebaTokenizer
+from framework.JiebaTokenizer import JiebaTokenizer
 from law import GovDict
 
 debug = False
