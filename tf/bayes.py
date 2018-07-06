@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
-import numpy as np
-import math
 import jieba
-import pickle
 import json
+import math
+import numpy as np
+import nltk
+import pickle
+import re
 import time
 from zhon.hanzi import punctuation  # 中文标点符号集合
 
@@ -45,6 +47,7 @@ def process_data(train_path, test_path, label_num, stop_word_list):
     samples = []
     labels = np.zeros((11), dtype=np.int)
     train_set = []
+    test_set = []
 
     k = 0
 
@@ -59,7 +62,7 @@ def process_data(train_path, test_path, label_num, stop_word_list):
             sample = {}
             label = int(tmp[0])
             labels[label - 1] += 1
-            content = "".join(tmp[1:])
+            content = re.sub(r"[a-zA-Z0-9]+", '', "".join(tmp[1:]))
             word_list = jieba_fenci(content, stop_word_list)
             train_set.append((word_list, label))
             word_bag_ = word_bag_ + (word_list)
@@ -110,7 +113,17 @@ def process_data(train_path, test_path, label_num, stop_word_list):
         pickle.dump(A, file=f)
         f.close()
         print("train_set finished")
-    return A, train_set, word_bag, labels
+
+    with open(test_path, 'r', encoding='utf-8') as g:
+        for line in g:
+            label = int(line.split(',')[0]) - 1
+            content = ""
+            for aa in line.split(',')[1:]:
+                content += aa
+            word_list = jieba_fenci(content, stop_word_list)
+            test_set.append((word_list, label))
+
+    return A, train_set, test_set, word_bag, labels
 
 
 def cal_b_from_a(A):
@@ -155,7 +168,7 @@ def cal_chi_from_a_b(A, B, labels):
                 CHI[i][j] = 0
             else:
                 tmp = (np.square((A[i][j]*D[i][j] - B[i][j]*C[i][j]))) / ((A[i][j] + B[i][j]) * (C[i][j] + D[i][j]))
-                print("chi[{0}][{1}] = math.log({2}/{3}) * {4}".format(i, j, N, A[i][j] + B[i][j], tmp))
+                #print("chi[{0}][{1}] = math.log({2}/{3}) * {4}".format(i, j, N, A[i][j] + B[i][j], tmp))
                 CHI[i][j] = math.log(N / (A[i][j] + B[i][j])) * tmp
 
     return CHI
@@ -166,8 +179,7 @@ def feature_select(chi, word_bag):
     for j in range(chi.shape[1]):
         a = chi[:, j]
         y = enumerate(a)
-        a = sorted(y, key=lambda x: x[1], reverse=True)[:10]
-        print(a)
+        a = sorted(y, key=lambda x: x[1], reverse=True)[:100]
         b = []
         for aa in a:
             b.append(aa[0])
@@ -177,19 +189,35 @@ def feature_select(chi, word_bag):
     for w in word_dict:
         if word_bag[w] not in words:
             words.append(word_bag[w])
-    print(words)
     return word_dict, words
 
 
-def document_features():
+def document_features(data, word_bag):
     """
     labeled_featuresets: A list of classified featuresets,
     i.e., a list of tuples ``(featureset, label)``.
     """
+    feature = {}
+    tokens = set(data)
+    for w in word_bag:
+        if w in tokens:
+            feature[w] = 1
+        else:
+            feature[w] = 0
+    return feature
+
 
 sample_num = 11
 
-A, train_set, word_bag, labels = process_data("./data/training.csv", './data/testing.csv', sample_num, stop_word_list=stop_words_gbk())
+A, train_set, test_set, word_bag, labels = process_data("./data/training.csv", './data/testing.csv', sample_num, stop_word_list=stop_words_gbk())
+
+fp = open("./train_set.json", "w", encoding='utf-8')
+json.dump(train_set, fp)
+fp.close()
+
+fp = open("./test_set.json", "w", encoding='utf-8')
+json.dump(train_set, fp)
+fp.close()
 
 print("word bag ")
 print(word_bag)
@@ -205,4 +233,17 @@ chi_fp = open("chi.pickle", "wb")
 pickle.dump(CHI, file=chi_fp)
 
 word_dict, words = feature_select(CHI, word_bag)
+print(words)
+
+
+documents = [(document_features(data[0], words), data[1]) for data in train_set]
+test_documents_feature = [(document_features(data[0], words), data[1]) for data in test_set]
+
+json.dump(documents, open('./documents_feature.json', 'w', encoding='utf-8'))
+json.dump(test_documents_feature, open('./test_documents_feature.json', 'w', encoding='utf-8'))
+
+classifier = nltk.NaiveBayesClassifier.train(documents[:4000])
+test_error = nltk.classify.accuracy(classifier, documents[4000:4773])
+print("test_error:{}".format(test_error))
+classifier.show_most_informative_features(20)
 
