@@ -36,7 +36,9 @@ print('Y_train',Y_train.shape)
 print('X_test',X_test.shape)
 print('Y_test',Y_test.shape)
 
+print(X_train[10,:]*255 + X_mean)
 ex_image = (np.reshape(X_train[10,:]*255 + X_mean, (28, 28))).astype(np.uint8)
+
 plt.imshow(ex_image, interpolation='nearest')
 plt.show()
 
