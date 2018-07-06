@@ -11,12 +11,12 @@ from zhon.hanzi import punctuation  # 中文标点符号集合
 
 
 def stop_words():
-    stopwords_list = [line.strip() for line in open('./../framework/stop_words_jieba.utf8.txt', encoding='utf-8')]
+    stopwords_list = [line.strip() for line in open('./../../framework/stop_words_jieba.utf8.txt', encoding='utf-8')]
     stopwords_list = stopwords_list + [' ', '\n', '\t', '，']
     return stopwords_list
 
 def stop_words_gbk():
-    stop_words_file = open('stop_words_ch.txt', 'r',encoding='gbk')
+    stop_words_file = open('./stop_words_ch.txt', 'r', encoding='gbk')
     stopwords_list = []
     for line in stop_words_file.readlines():
         stopwords_list.append(line[:-1])
@@ -101,15 +101,15 @@ def process_data(train_path, test_path, label_num, stop_word_list):
         print("build A matrix used {}s".format(end - begin))
         print(A)
 
-        w = open('./word_bag.json', 'w', encoding='utf-8')
-        json.dump(word_bag, fp=w)
+        w = open('./.word_bag.json', 'w', encoding='utf-8')
+        json.dump(word_bag, fp=w, ensure_ascii=False)
         w.close()
 
-        l = open('./label.pickle', 'wb')
+        l = open('./.label.pickle', 'wb')
         pickle.dump(labels, file=l)
         l.close()
 
-        f = open('./A.pickle', 'wb')
+        f = open('./.A.pickle', 'wb')
         pickle.dump(A, file=f)
         f.close()
         print("train_set finished")
@@ -211,11 +211,11 @@ sample_num = 11
 
 A, train_set, test_set, word_bag, labels = process_data("./data/training.csv", './data/testing.csv', sample_num, stop_word_list=stop_words_gbk())
 
-fp = open("./train_set.json", "w", encoding='utf-8')
+fp = open("./.train_set.json", "w", encoding='utf-8')
 json.dump(train_set, fp)
 fp.close()
 
-fp = open("./test_set.json", "w", encoding='utf-8')
+fp = open("./.test_set.json", "w", encoding='utf-8')
 json.dump(train_set, fp)
 fp.close()
 
@@ -229,7 +229,7 @@ print(B)
 CHI = cal_chi_from_a_b(A, B, labels)
 print("chi matrix ")
 print(CHI)
-chi_fp = open("chi.pickle", "wb")
+chi_fp = open(".chi.pickle", "wb")
 pickle.dump(CHI, file=chi_fp)
 
 word_dict, words = feature_select(CHI, word_bag)
@@ -237,13 +237,16 @@ print(words)
 
 
 documents = [(document_features(data[0], words), data[1]) for data in train_set]
+
 test_documents_feature = [(document_features(data[0], words), data[1]) for data in test_set]
 
-json.dump(documents, open('./documents_feature.json', 'w', encoding='utf-8'))
-json.dump(test_documents_feature, open('./test_documents_feature.json', 'w', encoding='utf-8'))
+json.dump(documents, open('./.documents_feature.json', 'w', encoding='utf-8'), ensure_ascii=False)
+json.dump(test_documents_feature, open('./.test_documents_feature.json', 'w', encoding='utf-8'), ensure_ascii=False)
 
 classifier = nltk.NaiveBayesClassifier.train(documents[:4000])
 test_error = nltk.classify.accuracy(classifier, documents[4000:4773])
 print("test_error:{}".format(test_error))
 classifier.show_most_informative_features(20)
+
+pickle.dump(classifier, open("./.bayes_classifier.pickle", 'wb'))
 
