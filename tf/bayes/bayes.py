@@ -190,6 +190,9 @@ def cal_chi_from_a_b(A, B, labels):
 
 def feature_select(chi, word_bag):
     word_dict = []
+
+    fp = open("./.label_keywords.txt", "w", encoding="utf-8")
+
     for j in range(chi.shape[1]):
         a = chi[:, j]
         y = enumerate(a)
@@ -197,7 +200,12 @@ def feature_select(chi, word_bag):
         b = []
         for aa in a:
             b.append(aa[0])
+        c = [word_bag[x] for x in b]
+        c = list(set(c))
+        fp.write("{0},{1}".format(j + 1, " ".join(c) + "\n"))
         word_dict.extend(b)
+
+    fp.close()
 
     words = []
     for w in word_dict:

@@ -6,7 +6,13 @@ from bayes import *
 
 
 def bayes_prob(cls_file, word_bag_file, input_text):
-
+    """
+    贝叶斯分类预测
+    :param cls_file:
+    :param word_bag_file:
+    :param input_text:
+    :return:
+    """
 
     cls = pickle.load(open(cls_file, "rb"))
 
@@ -24,4 +30,6 @@ if __name__ == "__main__":
 
     word_bag_file = sys.argv[2]
 
-    bayes_prob(cls_file, word_bag_file, input_text="如果创始人和公司未签署本条款清单并交付给投资人，其将于2017年12月18日18:30分失效")
+    input_text = sys.argv[3]
+
+    bayes_prob(cls_file, word_bag_file, input_text=input_text)
