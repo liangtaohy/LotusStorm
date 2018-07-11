@@ -13,6 +13,8 @@ Y = mnist.target.astype(float)
 
 mask = np.random.permutation(range(np.shape(X)[0]))
 
+print("mask: {}".format(np.shape(X)[0]))
+print(mask)
 num_train = 10000
 num_test = 500
 K = 10
@@ -20,7 +22,10 @@ K = 10
 X_train = X[mask[:num_train]]
 Y_train = Y[mask[:num_train]]
 
-X_mean = np.mean(X_train,axis = 0)
+print("Y_train: ")
+print(Y_train)
+
+X_mean = np.mean(X_train, axis=0)
 
 X_train = (X_train-X_mean)/255
 
@@ -36,7 +41,7 @@ print('Y_train',Y_train.shape)
 print('X_test',X_test.shape)
 print('Y_test',Y_test.shape)
 
-print(X_train[10,:]*255 + X_mean)
+#print(X_train[10,:]*255 + X_mean)
 ex_image = (np.reshape(X_train[10,:]*255 + X_mean, (28, 28))).astype(np.uint8)
 
 plt.imshow(ex_image, interpolation='nearest')
@@ -79,7 +84,7 @@ B = np.sum(np.square(X_train),axis = 1)
 C = np.dot(X_test,X_train.T)
 
 dists_3 = np.sqrt(A[:,np.newaxis]+B[np.newaxis,:]-2*C)
-        
+
 stop = time.time()
 time_taken = stop-start
 print('Time taken with no for loops: {}s'.format(time_taken))

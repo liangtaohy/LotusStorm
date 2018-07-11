@@ -271,8 +271,9 @@ if __name__ == "__main__":
 
     json.dump(documents, open('./.documents_feature.json', 'w', encoding='utf-8'), ensure_ascii=False)
 
-    classifier = nltk.NaiveBayesClassifier.train(documents)
-
+    classifier = nltk.NaiveBayesClassifier.train(documents[:320])
+    test_error = nltk.classify.accuracy(classifier, documents[320:358])
+    print("test_error:{}".format(test_error))
     if len(test_set):
         test_documents_feature = [(document_features(data[0], words), data[1]) for data in test_set]
         json.dump(test_documents_feature, open('./.test_documents_feature.json', 'w', encoding='utf-8'), ensure_ascii=False)
