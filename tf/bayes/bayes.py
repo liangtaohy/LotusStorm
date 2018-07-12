@@ -23,7 +23,11 @@ def stop_words_local():
     stopwords_list = []
     for line in stop_words_file.readlines():
         stopwords_list.append(line[:-1])
-    return stopwords_list
+
+    if os.path.exists("./unrelative_words.json"):
+        words = json.load(open("./unrelative_words.json", 'r', encoding="utf-8"))
+        stopwords_list.extend(words)
+    return list(set(stopwords_list))
 
 
 def jieba_fenci(raw, stopwords_list):
@@ -246,12 +250,12 @@ if __name__ == "__main__":
     A, train_set, test_set, word_bag, labels = process_data(train_file, test_file, sample_num, stop_word_list=stop_words_local())
 
     fp = open("./.train_set.json", "w", encoding='utf-8')
-    json.dump(train_set, fp)
+    json.dump(train_set, fp, ensure_ascii=False)
     fp.close()
 
     if len(test_set):
         fp = open("./.test_set.json", "w", encoding='utf-8')
-        json.dump(test_set, fp)
+        json.dump(test_set, fp, ensure_ascii=False)
         fp.close()
 
     print("A matrix ")
