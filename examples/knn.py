@@ -56,7 +56,9 @@ start = time.time()
 dists_1 = np.zeros((num_test,num_train))
 for i in range(num_test):
     for j in range(num_train):
-          dists_1[i,j] = np.sqrt(np.square(np.sum(X_test[i,:]-X_train[j,:])))
+          #dists_1[i,j] = np.sqrt(np.square(np.sum(X_test[i,:]-X_train[j,:])))
+        #dists_1[i, j] = np.sqrt(np.sum(np.square(X_test[i, :] - X_train[j, :])))
+        dists_1[i, j] = np.sqrt(np.sum(np.abs(X_test[i, :] - X_train[j, :])))
 
 stop = time.time()
 time_taken = stop-start
@@ -91,6 +93,7 @@ print('Time taken with no for loops: {}s'.format(time_taken))
 
 sorted_dist_indices = np.argsort(dists_3, axis=1)
 
+print(sorted_dist_indices)
 closest_k = Y_train[sorted_dist_indices][:,:K].astype(int)
 Y_pred = np.zeros_like(Y_test)
 
