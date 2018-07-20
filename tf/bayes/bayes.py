@@ -27,11 +27,12 @@ def stop_words_local():
     if os.path.exists("./unrelative_words.json"):
         words = json.load(open("./unrelative_words.json", 'r', encoding="utf-8"))
         stopwords_list.extend(words)
+    stopwords_list.extend(["满意","唆使"])
     return list(set(stopwords_list))
 
 
 def jieba_fenci(raw, stopwords_list):
-    word_list = list(jieba.cut_for_search(raw))
+    word_list = list(jieba.cut(raw))
     for word in word_list:
         if word in stopwords_list:
             word_list.remove(word)
@@ -44,6 +45,15 @@ def jieba_fenci(raw, stopwords_list):
     return word_list
 
 
+def process_all_terms(term_file, stop_word_list):
+    tokens = []
+    for line in open(term_file, "r", encoding="utf-8"):
+        t = jieba_fenci("".join(line.strip().split(",")[1:]), stop_word_list)
+        tokens.extend(t)
+    tokens = list(set(tokens))
+    return tokens
+
+
 def process_data(train_path, test_path, label_num, stop_word_list):
     """
     数据预处理
@@ -53,8 +63,6 @@ def process_data(train_path, test_path, label_num, stop_word_list):
     :param stop_word_list: 停用词列表
     :return:
     """
-    print("stop_word_list: ")
-    print(stop_word_list)
     word_bag_ = []
     word_bag = []
     samples = []
@@ -73,13 +81,12 @@ def process_data(train_path, test_path, label_num, stop_word_list):
     with open(train_path, 'r', encoding='utf-8') as f:
         for line in f:
             k += 1
-            print("process line {0}".format(k))
             line = line.strip()
             tmp = line.split(',')
             sample = {}
             label = int(tmp[0])
             labels[label - 1] += 1
-            content = re.sub(r"[a-zA-Z0-9_]+", '', "".join(tmp[1:]))
+            content = re.sub(r"[a-zA-Z0-9_\u0020]+", '', "".join(tmp[1:]))
             word_list = jieba_fenci(content, stop_word_list)
             train_set.append((word_list, label))
             word_bag_ = word_bag_ + (word_list)
@@ -200,7 +207,7 @@ def feature_select(chi, word_bag):
     for j in range(chi.shape[1]):
         a = chi[:, j]
         y = enumerate(a)
-        a = sorted(y, key=lambda x: x[1], reverse=True)[:30]
+        a = sorted(y, key=lambda x: x[1], reverse=True)[:5]
         b = []
         for aa in a:
             b.append(aa[0])
@@ -215,7 +222,6 @@ def feature_select(chi, word_bag):
     for w in word_dict:
         if word_bag[w] not in words:
             words.append(word_bag[w])
-    print(words)
     return word_dict, words
 
 
@@ -235,7 +241,6 @@ def document_features(data, word_bag):
 
 
 if __name__ == "__main__":
-
     if len(sys.argv) != 4:
         print("python3 bayes.py {training file} {testing file} {the total of class}")
         print("")
@@ -247,6 +252,9 @@ if __name__ == "__main__":
     test_file = sys.argv[2]
     sample_num = int(sys.argv[3])
 
+    term_word_bag = process_all_terms("./../../corpus/samples/ts/regular_terms.txt", stop_word_list=stop_words_local())
+
+    print(term_word_bag)
     A, train_set, test_set, word_bag, labels = process_data(train_file, test_file, sample_num, stop_word_list=stop_words_local())
 
     fp = open("./.train_set.json", "w", encoding='utf-8')
@@ -258,25 +266,32 @@ if __name__ == "__main__":
         json.dump(test_set, fp, ensure_ascii=False)
         fp.close()
 
-    print("A matrix ")
-    print(A)
     B = cal_b_from_a(A)
-    print("B matrix ")
-    print(B)
+
     CHI = cal_chi_from_a_b(A, B, labels)
-    print("chi matrix ")
-    print(CHI)
+
     chi_fp = open(".chi.pickle", "wb")
     pickle.dump(CHI, file=chi_fp)
 
     word_dict, words = feature_select(CHI, word_bag)
+    #words = word_bag
+
+    # 加上term中的词汇，看看效果
+    words.extend(term_word_bag)
+
+    # 写入词袋文件
+    json.dump(words, open("./.word_bag.json", "w", encoding="utf-8"), ensure_ascii=False)
+
+    f = open("chi_selected_words.txt", "w", encoding="utf-8")
+    f.write("\n".join(words))
+    f.close()
 
     documents = [(document_features(data[0], words), data[1]) for data in train_set]
 
     json.dump(documents, open('./.documents_feature.json', 'w', encoding='utf-8'), ensure_ascii=False)
 
-    classifier = nltk.NaiveBayesClassifier.train(documents[:320])
-    test_error = nltk.classify.accuracy(classifier, documents[320:358])
+    classifier = nltk.NaiveBayesClassifier.train(documents[:550])
+    test_error = nltk.classify.accuracy(classifier, documents[550:605])
     print("test_error:{}".format(test_error))
     if len(test_set):
         test_documents_feature = [(document_features(data[0], words), data[1]) for data in test_set]
@@ -290,8 +305,9 @@ if __name__ == "__main__":
 
     pickle.dump(classifier, open("./.bayes_classifier.pickle", 'wb'))
 
-    input_set = jieba_fenci("如果创始人和公司未签署本条款清单并交付给投资人，其将于2017年12月18日18:30分失效", stopwords_list=stop_words_local())
-    input_feature = document_features(input_set, word_bag)
+    input_set = jieba_fenci("交割先决条件", stopwords_list=stop_words_local())
+    input_feature = document_features(input_set, words)
+    print(input_feature)
     result = classifier.prob_classify(input_feature)
     print("测试结果：")
     print(result.max())

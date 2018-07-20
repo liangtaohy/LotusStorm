@@ -53,17 +53,13 @@ def get_unrelative_words(train_set_file, word_bag_file):
 
     average_per_label = num_train / len(labels)
 
-    up = int(0.3 * num_train)
+    up = int(0.6 * num_train)
     down = int(average_per_label / 3)
-
+    print("up:{0},down:{1}".format(up, down))
     clean = [word_bag[i] for i in sorted_df_indices if df[i] > down and df[i] < up]
-    print(clean)
-    print("分类不相关词列表如下：")
     unrelative_words = [word_bag[i] for i in sorted_df_indices if df[i] <= down or df[i] >= up]
-    print(unrelative_words)
 
-    print(len(unrelative_words))
-    print(Z.shape)
+    print([word_bag[i] for i in sorted_df_indices if df[i] <= down])
     return unrelative_words
 
 
