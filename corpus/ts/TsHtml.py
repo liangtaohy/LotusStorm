@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# 解析html类型的ts文档
+#
 import os
 import re
 from bs4 import BeautifulSoup
