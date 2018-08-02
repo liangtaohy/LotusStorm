@@ -19,7 +19,7 @@ def stop_words():
 
 
 def stop_words_local():
-    stop_words_file = open('./stop_words_utf8.txt', 'r', encoding='utf-8')
+    stop_words_file = open(os.path.join(os.path.dirname(__file__), './stop_words_utf8.txt'), 'r', encoding='utf-8')
     stopwords_list = []
     for line in stop_words_file.readlines():
         stopwords_list.append(line[:-1])

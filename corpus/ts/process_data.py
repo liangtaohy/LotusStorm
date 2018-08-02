@@ -19,7 +19,7 @@ f = open("./../samples/ts/labels.json", "w", encoding="utf-8")
 json.dump(labels, open("./../samples/ts/labels.json", "w", encoding="utf-8"), ensure_ascii=False)
 
 labeled_txt = []
-for line in open("./../samples/ts/all_ts_terms.txt", "r", encoding="utf-8"):
+for line in open("./test_ts.txt", "r", encoding="utf-8"):
     l = line.strip().split(',')
     matched = False
     for term in terms:
@@ -31,6 +31,7 @@ for line in open("./../samples/ts/all_ts_terms.txt", "r", encoding="utf-8"):
         print(line)
 f.close()
 
-f = open("./../samples/ts/train_set.csv", "w", encoding="utf-8")
+f = open("./../samples/ts/test_ts.csv", "w", encoding="utf-8")
 f.writelines(labeled_txt)
 f.close()
+

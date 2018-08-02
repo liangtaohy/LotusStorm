@@ -10,6 +10,8 @@ import sys
 sys.path.append("../")
 import re
 
+from pycui import *
+
 from framework.JiebaTokenizer import JiebaTokenizer
 jieba = JiebaTokenizer(stop_words_path=os.path.dirname(os.path.realpath(__file__)) +
                                                     '/../framework/stop_words_jieba.utf8.txt')
@@ -25,6 +27,9 @@ if __name__ == '__main__':
     input = sys.argv[1]
     output = sys.argv[2]
 
+    color = Color()
+
+    cui = pycui()
 
     user_dict = None
 
@@ -34,14 +39,10 @@ if __name__ == '__main__':
     if user_dict:
         jieba.set_user_dict(user_dict_file=user_dict)
 
-    f = open(input, "r", encoding='utf-8')
     lines = []
 
     with open(input, "r", encoding='utf-8') as f:
         for l in f:
-            l = f.readline()
-            if not l:
-                break
             l = re.sub(r"([0-9]+,)", "", l)
             tokens = tokenize(l)
             lines.append(" ".join(tokens) + "\n")
@@ -49,3 +50,6 @@ if __name__ == '__main__':
     f = open(output, "w", encoding="utf-8")
     f.writelines(lines)
     f.close()
+
+    print("\n\n")
+    cui.p("已写入文件: %s" % output, color.RED)

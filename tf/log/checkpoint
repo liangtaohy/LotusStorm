@@ -1,0 +1,2 @@
+model_checkpoint_path: "/Users/xlegal/PycharmProjects/LotusStorm/tf/log/model.ckpt"
+all_model_checkpoint_paths: "/Users/xlegal/PycharmProjects/LotusStorm/tf/log/model.ckpt"

@@ -10,11 +10,11 @@ X = pickle.load(open("../bayes/onehot_doc_feature.pickle", "rb"))
 
 Y = pickle.load(open("../bayes/onehot_doc_Y.pickle", "rb"))
 
-test_X = X[300:359]
-test_Y = Y[300:359]
+test_X = X[550:605]
+test_Y = Y[550:605]
 
-X = X[:300]
-Y = Y[:300]
+X = X[:550]
+Y = Y[:550]
 
 num_test = len(test_X)
 num_train = len(X)
@@ -27,7 +27,7 @@ for i in range(num_test):
 
 indices = np.argsort(dist, axis=1)
 
-K = 3
+K = 5
 
 closest_k = Y[indices][:, :K].astype(int)
 

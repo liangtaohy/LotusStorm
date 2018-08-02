@@ -6,7 +6,7 @@ import re
 from bs4 import BeautifulSoup
 
 
-class TsParser:
+class TsHtml:
     def __init__(self, sample_dir):
         self.sample_dir = sample_dir
 
@@ -55,5 +55,5 @@ class TsParser:
 
 
 if __name__ == '__main__':
-    ts = TsParser(sample_dir='../samples/ts/html')
+    ts = TsHtml(sample_dir='../samples/ts/html')
     ts.get_items()
