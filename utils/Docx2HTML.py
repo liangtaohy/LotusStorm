@@ -16,7 +16,7 @@ def to_text(filename):
 
 
 if __name__ == "__main__":
-    f = "/Users/xlegal/Desktop/Series+A-3+TermSheet.docx"
+    f = "/Users/xlegal/PycharmProjects/LotusStorm/uploads/02_TS-_template-2018.docx"
 
     content = to_text(f)
     fp = open("1.txt", "w", encoding="utf-8")

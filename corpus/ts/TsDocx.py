@@ -44,15 +44,20 @@ def _xml_tag(tag):
     return '{%s}%s' % ("http://www.w3.org/XML/1998/namespace", tag)
 
 
-def _itertext(my_etree):
+def _itertext(my_etree, ind='', jc=''):
     """Iterator to go through xml tree's text nodes"""
+    flag = True
     for node in my_etree.iter():
         if _check_element_is(node, 't'):
             space = node.get(_xml_tag('space'))
             text = node.text
             text = text.strip()
-            if len(text) > 0 and space:
-                text = "@#" + text + "#@"
+            if len(text) > 0:
+                if space:
+                    text = "@#" + text + "#@"
+                elif flag is True and ind == 'ind' and jc == 'both':
+                    text = "@#" + text + "#@"
+                flag = False
             yield (node, text)
 
 
@@ -114,6 +119,7 @@ def guess_wp_type(ts_file):
         for child in body:
             if _check_element_is(child, 'p'):
                 jc_val = '#'
+                ind = ''
                 pPrs = child.findall(_tag('pPr'))
                 if pPrs:
                     jcs = pPrs[0].findall(_tag('jc'))
@@ -122,8 +128,11 @@ def guess_wp_type(ts_file):
                         val = jc.get(_tag('val'))
                         if val:
                             jc_val = val
+                    inds = pPrs[0].findall(_tag('ind'))
+                    if inds:
+                        ind = 'ind'
 
-                texts = [text for node, text in _itertext(child)]
+                texts = [text for node, text in _itertext(child, ind, jc_val)]
                 text = "".join(texts)
                 text = re.sub(r's+', '', text)
                 text = text.strip()
@@ -146,7 +155,7 @@ def guess_wp_type(ts_file):
                         if size >= 3:
                             for tt in tcs[0:2]:
                                 term.extend([text for node, text in _itertext(tt)])
-                            print(term)
+                            #print(term)
                         else:
                             term = [text for node, text in _itertext(tcs[0])]
                         term = "".join(term)
@@ -225,11 +234,13 @@ def handle_wps(wps, term_dict):
         words = t[2]
         c = "".join(t[3:])
 
+        last_no = 0
         if line_no <= 6 and jc == 'center':
             doc['title'].append(c)
+            last_no = line_no
 
-        if line_no > 6:
-            matches = re.search(r'@#(.*)#@', c)
+        if line_no > last_no:
+            matches = re.search(r'@#([\u4E00-\u9FA5：:]+)#@', c)
             if matches:
                 p_term = matches.group(1)
                 term_len = len(p_term)
@@ -247,6 +258,15 @@ def handle_wps(wps, term_dict):
                     'jc': jc,
                     'term': p_term,
                     'content': c[c.index("#@") + 2:]
+                }
+                doc['terms'].append(t2)
+            else:
+                t2 = {
+                    'p': 0,
+                    'line_no': line_no,
+                    'jc': jc,
+                    'term': "普通段落",
+                    'content': c
                 }
                 doc['terms'].append(t2)
 

@@ -9,7 +9,6 @@ import pickle
 import re
 import sys
 import time
-from zhon.hanzi import punctuation  # 中文标点符号集合
 
 
 def stop_words():
