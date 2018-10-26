@@ -50,6 +50,8 @@ filename = "/Users/xlegal/Downloads/text8.zip"
 # 数据读入list
 def read_data(filename):
     with zipfile.ZipFile(filename) as f:
+        print('zipfile namelist')
+        print(f.namelist())
         data = tf.compat.as_str(f.read(f.namelist()[0])).split()
     return data
 
@@ -57,8 +59,7 @@ def read_data(filename):
 vocabulary = read_data(filename)
 print('Data size', len(vocabulary))
 
-print(vocabulary)
-
+print('shape', vocabulary[:10])
 
 # 步骤2：构建词典，把不常见的词替换为UNK
 vocabulary_size = 50000
